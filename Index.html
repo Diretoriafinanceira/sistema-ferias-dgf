@@ -1,0 +1,3605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
+<title>DGF - Sistema de Férias</title>
+
+<style>
+
+:root{
+  --navy:#0f172a;
+  --navy2:#172554;
+  --blue:#2563eb;
+  --blue2:#1d4ed8;
+  --green:#059669;
+  --green2:#047857;
+  --yellow:#facc15;
+  --orange:#fb923c;
+  --red:#ef4444;
+  --purple:#7c3aed;
+  --gray:#64748b;
+  --light:#f8fafc;
+  --border:#e2e8f0;
+  --white:#ffffff;
+  --shadow:0 12px 35px rgba(15,23,42,.08);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  font-family:
+    Inter,
+    Arial,
+    Helvetica,
+    sans-serif;
+  background:#f1f5f9;
+  color:#0f172a;
+}
+
+button,
+input,
+select,
+textarea{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+#app{
+  min-height:100vh;
+}
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+#loading{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.45);
+  backdrop-filter:blur(4px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:9999;
+}
+
+.loader-box{
+  background:#fff;
+  padding:28px 36px;
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.loader{
+  width:46px;
+  height:46px;
+  border:5px solid #e2e8f0;
+  border-top-color:var(--blue);
+  border-radius:50%;
+  animation:girar .8s linear infinite;
+  margin:auto auto 15px;
+}
+
+@keyframes girar{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+#toast{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  max-width:420px;
+  padding:16px 20px;
+  background:#0f172a;
+  color:#fff;
+  border-radius:14px;
+  box-shadow:var(--shadow);
+  display:none;
+  z-index:10000;
+}
+
+#toast.sucesso{
+  background:#047857;
+}
+
+#toast.erro{
+  background:#b91c1c;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.topbar{
+  background:
+    linear-gradient(
+      135deg,
+      #0f172a,
+      #172554
+    );
+  color:#fff;
+  min-height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 32px;
+  position:sticky;
+  top:0;
+  z-index:1000;
+  box-shadow:0 5px 25px rgba(0,0,0,.15);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:14px;
+}
+
+.brand-logo{
+  width:44px;
+  height:44px;
+  border-radius:12px;
+  background:#fff;
+  color:var(--navy);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+  font-size:19px;
+}
+
+.brand-title{
+  font-size:18px;
+  font-weight:800;
+}
+
+.brand-sub{
+  font-size:11px;
+  opacity:.7;
+  margin-top:2px;
+}
+
+.nav{
+  display:flex;
+  gap:7px;
+}
+
+.nav button{
+  border:0;
+  background:transparent;
+  color:#cbd5e1;
+  padding:10px 14px;
+  border-radius:10px;
+  transition:.2s;
+}
+
+.nav button:hover,
+.nav button.ativo{
+  background:rgba(255,255,255,.12);
+  color:#fff;
+}
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.container{
+  width:min(1250px, calc(100% - 36px));
+  margin:30px auto 60px;
+}
+
+.page{
+  display:none;
+  animation:entrar .25s ease;
+}
+
+.page.ativa{
+  display:block;
+}
+
+@keyframes entrar{
+  from{
+    opacity:0;
+    transform:translateY(7px);
+  }
+
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.hero{
+  background:
+    linear-gradient(
+      135deg,
+      #0f172a,
+      #1e3a8a
+    );
+  color:#fff;
+  border-radius:24px;
+  padding:38px;
+  box-shadow:var(--shadow);
+  margin-bottom:24px;
+}
+
+.hero h1{
+  margin:0 0 10px;
+  font-size:32px;
+}
+
+.hero p{
+  margin:0;
+  max-width:800px;
+  color:#cbd5e1;
+  line-height:1.7;
+}
+
+.card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:20px;
+  box-shadow:var(--shadow);
+  padding:24px;
+  margin-bottom:22px;
+}
+
+.card h2,
+.card h3{
+  margin-top:0;
+}
+
+.grid{
+  display:grid;
+  gap:18px;
+}
+
+.grid-2{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+}
+
+.grid-3{
+  grid-template-columns:repeat(3,minmax(0,1fr));
+}
+
+.grid-4{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+}
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.form-group{
+  margin-bottom:16px;
+}
+
+label{
+  display:block;
+  font-size:13px;
+  font-weight:800;
+  margin-bottom:7px;
+  color:#334155;
+}
+
+input,
+select,
+textarea{
+  width:100%;
+  border:1px solid #cbd5e1;
+  border-radius:11px;
+  padding:12px 13px;
+  outline:none;
+  background:#fff;
+  transition:.2s;
+}
+
+input:focus,
+select:focus,
+textarea:focus{
+  border-color:var(--blue);
+  box-shadow:0 0 0 3px rgba(37,99,235,.1);
+}
+
+textarea{
+  min-height:120px;
+  resize:vertical;
+}
+
+.required{
+  color:#dc2626;
+}
+
+.help{
+  font-size:12px;
+  color:#64748b;
+  margin-top:5px;
+}
+
+/* =====================================================
+   PERÍODO AQUISITIVO
+===================================================== */
+
+.aquisitivo-info{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-left:4px solid #2563eb;
+  border-radius:12px;
+  padding:13px 14px;
+}
+
+.aquisitivo-info .aquisitivo-label{
+  font-size:11px;
+  font-weight:900;
+  color:#64748b;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:5px;
+}
+
+.aquisitivo-info .aquisitivo-valor{
+  font-size:14px;
+  font-weight:800;
+  color:#0f172a;
+}
+
+.aquisitivo-info .aquisitivo-ajuda{
+  font-size:11px;
+  color:#64748b;
+  margin-top:4px;
+}
+
+/* =====================================================
+   RODAPÉ LEGAL
+===================================================== */
+
+.rodape-legal{
+  width:min(1250px, calc(100% - 36px));
+  margin:0 auto 25px;
+  color:#94a3b8;
+  font-size:10px;
+  line-height:1.65;
+}
+
+.rodape-legal summary{
+  cursor:pointer;
+  color:#64748b;
+  font-weight:700;
+  user-select:none;
+  padding:7px 0;
+}
+
+.rodape-legal summary:hover{
+  color:#334155;
+}
+
+.rodape-legal .lei-conteudo{
+  margin-top:5px;
+  padding:12px 14px;
+  background:rgba(255,255,255,.55);
+  border:1px solid #e2e8f0;
+  border-radius:10px;
+}
+
+/* =====================================================
+   BUTTONS
+===================================================== */
+
+.btn{
+  border:0;
+  border-radius:11px;
+  padding:12px 18px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.btn:hover{
+  transform:translateY(-1px);
+}
+
+.btn-primary{
+  background:var(--blue);
+  color:#fff;
+}
+
+.btn-primary:hover{
+  background:var(--blue2);
+}
+
+.btn-green{
+  background:var(--green);
+  color:#fff;
+}
+
+.btn-dark{
+  background:var(--navy);
+  color:#fff;
+}
+
+.btn-danger{
+  background:#dc2626;
+  color:#fff;
+}
+
+.btn-light{
+  background:#f1f5f9;
+  color:#334155;
+}
+
+.btn + .btn{
+  margin-left:7px;
+}
+
+/* =====================================================
+   HOME
+===================================================== */
+
+.quick-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
+}
+
+.quick-card{
+  padding:25px;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:.2s;
+}
+
+.quick-card:hover{
+  transform:translateY(-3px);
+}
+
+.quick-icon{
+  font-size:30px;
+  margin-bottom:10px;
+}
+
+.quick-card h3{
+  margin:0 0 8px;
+}
+
+.quick-card p{
+  color:#64748b;
+  line-height:1.5;
+  font-size:14px;
+}
+
+/* =====================================================
+   LEGEND
+===================================================== */
+
+.legend{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+
+.legend-item{
+  border-radius:14px;
+  padding:15px;
+  border:1px solid rgba(0,0,0,.08);
+}
+
+.legend-item strong{
+  display:block;
+  margin-bottom:5px;
+}
+
+.legend-item small{
+  line-height:1.4;
+}
+
+.legend-normal{
+  background:#f1f5f9;
+}
+
+.legend-yellow{
+  background:#fef9c3;
+}
+
+.legend-orange{
+  background:#ffedd5;
+}
+
+.legend-red{
+  background:#fee2e2;
+}
+
+.legend-purple{
+  background:#ede9fe;
+}
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+.metric{
+  padding:22px;
+  border-radius:18px;
+  background:#fff;
+  border:1px solid var(--border);
+}
+
+.metric-label{
+  color:#64748b;
+  font-size:13px;
+  font-weight:700;
+}
+
+.metric-number{
+  font-size:31px;
+  font-weight:900;
+  margin-top:8px;
+}
+
+/* =====================================================
+   RANKING
+===================================================== */
+
+.rank-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:18px;
+  display:flex;
+  align-items:center;
+  gap:18px;
+  margin-bottom:12px;
+  box-shadow:0 6px 18px rgba(15,23,42,.05);
+}
+
+.rank-number{
+  width:48px;
+  height:48px;
+  border-radius:14px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:900;
+}
+
+.rank-main{
+  flex:1;
+}
+
+.rank-name{
+  font-size:16px;
+  font-weight:900;
+}
+
+.rank-info{
+  color:#64748b;
+  font-size:13px;
+  margin-top:5px;
+}
+
+.month-badge{
+  padding:8px 12px;
+  border-radius:10px;
+  background:#eff6ff;
+  color:#1d4ed8;
+  font-weight:800;
+  font-size:12px;
+}
+
+.status{
+  display:inline-flex;
+  padding:7px 10px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.status-normal{
+  background:#f1f5f9;
+  color:#475569;
+}
+
+.status-atencao{
+  background:#fef08a;
+  color:#713f12;
+}
+
+.status-alerta{
+  background:#fed7aa;
+  color:#7c2d12;
+}
+
+.status-urgente{
+  background:#fecaca;
+  color:#7f1d1d;
+}
+
+.status-vencida{
+  background:#ddd6fe;
+  color:#4c1d95;
+}
+
+/* =====================================================
+   ADMIN TABLE
+===================================================== */
+
+.table-wrap{
+  overflow:auto;
+  border:1px solid var(--border);
+  border-radius:15px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:1100px;
+}
+
+th,
+td{
+  padding:12px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  background:#f8fafc;
+  color:#334155;
+  font-weight:900;
+}
+
+tr:hover td{
+  background:#f8fafc;
+}
+
+/* =====================================================
+   MODAL
+===================================================== */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(15,23,42,.55);
+  backdrop-filter:blur(5px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:5000;
+  padding:20px;
+}
+
+.modal.aberto{
+  display:flex;
+}
+
+.modal-box{
+  background:#fff;
+  border-radius:20px;
+  width:min(750px,100%);
+  max-height:90vh;
+  overflow:auto;
+  padding:26px;
+}
+
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.close{
+  border:0;
+  background:#f1f5f9;
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  font-size:20px;
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media(max-width:900px){
+
+  .topbar{
+    padding:12px 18px;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+  }
+
+  .nav{
+    width:100%;
+    overflow:auto;
+  }
+
+  .grid-2,
+  .grid-3,
+  .grid-4,
+  .quick-grid,
+  .legend{
+    grid-template-columns:1fr;
+  }
+
+  .hero{
+    padding:25px;
+  }
+
+  .hero h1{
+    font-size:25px;
+  }
+
+  .rank-card{
+    align-items:flex-start;
+    flex-wrap:wrap;
+  }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="loading">
+
+  <div class="loader-box">
+
+    <div class="loader"></div>
+
+    <strong>Processando...</strong>
+
+    <div class="help">
+      Aguarde um momento.
+    </div>
+
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<header class="topbar">
+
+  <div class="brand">
+
+    <div class="brand-logo">
+      DGF
+    </div>
+
+    <div>
+
+      <div class="brand-title">
+        Sistema de Férias
+      </div>
+
+      <div class="brand-sub">
+        Diretoria Geral de Finanças
+      </div>
+
+    </div>
+
+  </div>
+
+  <nav class="nav">
+
+    <button
+      onclick="navegar('inicio')"
+      data-nav="inicio">
+      Início
+    </button>
+
+    <button
+      onclick="navegar('cadastro')"
+      data-nav="cadastro">
+      Cadastro
+    </button>
+
+    <button
+      onclick="navegar('ranking')"
+      data-nav="ranking">
+      Ranking
+    </button>
+
+    <button
+      onclick="navegar('consulta')"
+      data-nav="consulta">
+      Meus dados
+    </button>
+
+    <button
+      onclick="navegar('admin')"
+      data-nav="admin">
+      Administração
+    </button>
+
+  </nav>
+
+</header>
+
+
+<main class="container">
+
+
+<!-- ===================================================
+     INÍCIO
+=================================================== -->
+
+<section id="page-inicio" class="page">
+
+  <div class="hero">
+
+    <h1>
+      Planejamento de Férias DGF
+    </h1>
+
+    <p>
+      Sistema corporativo para organização das preferências
+      de férias dos colaboradores da Diretoria Geral de Finanças.
+      Escolha seus dois meses de preferência e informe se deseja
+      solicitar o abono pecuniário de 10 dias.
+    </p>
+
+  </div>
+
+
+  <div id="dashboardCards"
+       class="grid grid-4">
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>
+      Indicadores de prazo
+    </h2>
+
+    <p class="help">
+      Os indicadores abaixo são utilizados para orientar a administração
+      sobre a proximidade do período de concessão.
+    </p>
+
+    <div class="legend">
+
+      <div class="legend-item legend-normal">
+
+        <strong>⚪ Menos de 12 meses</strong>
+
+        <small>
+          Período aquisitivo em andamento.
+        </small>
+
+      </div>
+
+      <div class="legend-item legend-yellow">
+
+        <strong>🟨 12 a 15 meses — ATENÇÃO</strong>
+
+        <small>
+          Direito adquirido; planejar o agendamento.
+        </small>
+
+      </div>
+
+      <div class="legend-item legend-orange">
+
+        <strong>🟧 16 a 19 meses — ALERTA</strong>
+
+        <small>
+          Recomenda-se definir o período de férias.
+        </small>
+
+      </div>
+
+      <div class="legend-item legend-red">
+
+        <strong>🟥 20 a 23 meses — URGENTE</strong>
+
+        <small>
+          Prioridade máxima para análise e agendamento.
+        </small>
+
+      </div>
+
+    </div>
+
+    <div class="legend" style="margin-top:12px">
+
+      <div class="legend-item legend-purple">
+
+        <strong>⛔ 24+ meses — VERIFICAR</strong>
+
+        <small>
+          Situação que deve ser conferida imediatamente pela administração.
+        </small>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="quick-grid">
+
+    <div
+      class="quick-card"
+      onclick="navegar('cadastro')">
+
+      <div class="quick-icon">
+        📝
+      </div>
+
+      <h3>
+        Fazer cadastro
+      </h3>
+
+      <p>
+        Informe seus dados e escolha os dois meses desejados.
+      </p>
+
+    </div>
+
+
+    <div
+      class="quick-card"
+      onclick="navegar('ranking')">
+
+      <div class="quick-icon">
+        🏆
+      </div>
+
+      <h3>
+        Ver ranking
+      </h3>
+
+      <p>
+        Consulte a ordem das preferências de férias.
+      </p>
+
+    </div>
+
+
+    <div
+      class="quick-card"
+      onclick="navegar('consulta')">
+
+      <div class="quick-icon">
+        🔎
+      </div>
+
+      <h3>
+        Consultar meus dados
+      </h3>
+
+      <p>
+        Visualize seu cadastro depois de realizado.
+      </p>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- ===================================================
+     CADASTRO
+=================================================== -->
+
+<section id="page-cadastro" class="page">
+
+  <div class="card">
+
+    <h2>
+      Cadastro de funcionário
+    </h2>
+
+    <p class="help">
+      Depois que o cadastro for enviado, os dados ficam bloqueados.
+      Para qualquer alteração será necessário solicitar à administração.
+    </p>
+
+    <form id="formCadastro">
+
+      <div class="grid grid-2">
+
+        <div class="form-group">
+
+          <label>
+            Nome completo <span class="required">*</span>
+          </label>
+
+          <input
+            id="cadNome"
+            required
+            placeholder="Digite o nome completo">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            CPF <span class="required">*</span>
+          </label>
+
+          <input
+            id="cadCPF"
+            required
+            maxlength="14"
+            placeholder="000.000.000-00"
+            oninput="formatarCPF(this)">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Matrícula <span class="required">*</span>
+          </label>
+
+          <input
+            id="cadMatricula"
+            required
+            placeholder="Número da matrícula">
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Cargo <span class="required">*</span>
+          </label>
+
+          <select id="cadCargo" required>
+
+            <option value="">
+              Carregando cargos...
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Data de admissão <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            id="cadAdmissao"
+            required>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Último período aquisitivo
+          </label>
+
+          <div class="aquisitivo-info">
+
+            <div class="aquisitivo-label">
+              Informação calculada
+            </div>
+
+            <div
+              id="cadUltimoPeriodoAquisitivo"
+              class="aquisitivo-valor">
+              Informe a data de admissão.
+            </div>
+
+            <div class="aquisitivo-ajuda">
+              Considera o último período completo de 12 meses contado a partir da admissão.
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Mês do último benefício de férias
+          </label>
+
+          <select id="cadMesUltimoBeneficio">
+            <option value="">Selecione o mês</option>
+          </select>
+
+          <div class="help">
+            Se ainda não tirou férias, selecione “Ainda não tirei férias”.
+          </div>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            Data de nascimento <span class="required">*</span>
+          </label>
+
+          <input
+            type="date"
+            id="cadNascimento"
+            required>
+
+        </div>
+
+      </div>
+
+
+      <hr style="border:0;border-top:1px solid #e2e8f0;margin:25px 0">
+
+
+      <h3>
+        Preferência de férias
+      </h3>
+
+      <div class="grid grid-2">
+
+        <div class="form-group">
+
+          <label>
+            1º mês de preferência <span class="required">*</span>
+          </label>
+
+          <select id="cadMes1" required>
+
+            <option value="">
+              Selecione
+            </option>
+
+          </select>
+
+        </div>
+
+
+        <div class="form-group">
+
+          <label>
+            2º mês de preferência <span class="required">*</span>
+          </label>
+
+          <select id="cadMes2" required>
+
+            <option value="">
+              Selecione
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <div class="card"
+           style="background:#f8fafc;box-shadow:none">
+
+        <label>
+          Deseja vender 10 dias de férias?
+        </label>
+
+        <label style="display:flex;align-items:center;gap:10px;font-weight:600">
+
+          <input
+            type="checkbox"
+            id="cadAbono"
+            style="width:auto">
+
+          Sim, desejo solicitar o abono pecuniário de 10 dias.
+
+        </label>
+
+        <div class="help">
+          A solicitação será registrada como preferência e deverá observar
+          os prazos e regras aplicáveis.
+        </div>
+
+      </div>
+
+
+      <div style="display:flex;justify-content:flex-end">
+
+        <button
+          type="submit"
+          class="btn btn-primary">
+
+          Enviar cadastro
+
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</section>
+
+
+<!-- ===================================================
+     RANKING
+=================================================== -->
+
+<section id="page-ranking" class="page">
+
+  <div class="hero">
+
+    <h1>
+      Ranking de preferências
+    </h1>
+
+    <p>
+      A ordem considera primeiro a proximidade do 1º mês escolhido,
+      depois a proximidade do 2º mês e, persistindo o empate,
+      a idade do funcionário, priorizando o mais velho.
+    </p>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="grid grid-2">
+
+      <div>
+
+        <label>
+          Filtrar por cargo
+        </label>
+
+        <select id="filtroCargo"
+                onchange="carregarRanking()">
+
+          <option value="TODOS">
+            Todos os cargos
+          </option>
+
+        </select>
+
+      </div>
+
+      <div style="display:flex;align-items:end">
+
+        <button
+          class="btn btn-light"
+          onclick="carregarRanking()">
+
+          🔄 Atualizar ranking
+
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div id="rankingLista"></div>
+
+</section>
+
+
+<!-- ===================================================
+     CONSULTA
+=================================================== -->
+
+<section id="page-consulta" class="page">
+
+  <div class="card">
+
+    <h2>
+      Consultar meus dados
+    </h2>
+
+    <p class="help">
+      Informe CPF e matrícula para localizar seu cadastro.
+    </p>
+
+    <div class="grid grid-2">
+
+      <div class="form-group">
+
+        <label>
+          CPF
+        </label>
+
+        <input
+          id="consultaCPF"
+          maxlength="14"
+          placeholder="000.000.000-00"
+          oninput="formatarCPF(this)">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Matrícula
+        </label>
+
+        <input
+          id="consultaMatricula"
+          placeholder="Matrícula">
+
+      </div>
+
+    </div>
+
+    <button
+      class="btn btn-primary"
+      onclick="consultarFuncionario()">
+
+      Consultar
+
+    </button>
+
+  </div>
+
+
+  <div id="resultadoConsulta"></div>
+
+</section>
+
+
+<!-- ===================================================
+     ADMIN
+=================================================== -->
+
+<section id="page-admin" class="page">
+
+  <div id="adminLogin">
+
+    <div class="card"
+         style="max-width:500px;margin:auto">
+
+      <h2>
+        Área administrativa
+      </h2>
+
+      <p class="help">
+        Área restrita à administração do sistema.
+      </p>
+
+      <div class="form-group">
+
+        <label>
+          Senha administrativa
+        </label>
+
+        <input
+          type="password"
+          id="senhaAdmin"
+          placeholder="Digite a senha">
+
+      </div>
+
+      <button
+        class="btn btn-dark"
+        onclick="loginAdmin()">
+
+        Entrar
+
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <div id="adminPainel"
+       style="display:none">
+
+    <div class="hero">
+
+      <h1>
+        Painel Administrativo
+      </h1>
+
+      <p>
+        Gerencie funcionários, preferências de férias
+        e solicitações de alteração.
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+
+        <div>
+
+          <h2>
+            Funcionários
+          </h2>
+
+          <p class="help">
+            O administrador pode alterar os dados mesmo após o bloqueio.
+          </p>
+
+        </div>
+
+        <button
+          class="btn btn-light"
+          onclick="carregarPainelAdmin()">
+
+          🔄 Atualizar
+
+        </button>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Nome</th>
+              <th>CPF</th>
+              <th>Matrícula</th>
+              <th>Cargo</th>
+              <th>1º mês</th>
+              <th>2º mês</th>
+              <th>Último benefício</th>
+              <th>Abono</th>
+              <th>Prazo</th>
+              <th>Ação</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="tabelaFuncionarios"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>
+        Solicitações de alteração
+      </h2>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+
+            <tr>
+
+              <th>Data</th>
+              <th>Funcionário</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th>Status</th>
+              <th>Ação</th>
+
+            </tr>
+
+          </thead>
+
+          <tbody id="tabelaSolicitacoes"></tbody>
+
+        </table>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+</main>
+
+
+<!-- ===================================================
+     MODAL EDIÇÃO
+=================================================== -->
+
+<div id="modalEdicao" class="modal">
+
+  <div class="modal-box">
+
+    <div class="modal-head">
+
+      <h2>
+        Editar funcionário
+      </h2>
+
+      <button
+        class="close"
+        onclick="fecharModal()">
+
+        ×
+
+      </button>
+
+    </div>
+
+
+    <input type="hidden"
+           id="editId">
+
+
+    <div class="grid grid-2">
+
+      <div class="form-group">
+
+        <label>
+          Nome completo
+        </label>
+
+        <input id="editNome">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          CPF
+        </label>
+
+        <input
+          id="editCPF"
+          maxlength="14"
+          oninput="formatarCPF(this)">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Matrícula
+        </label>
+
+        <input id="editMatricula">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Cargo
+        </label>
+
+        <select id="editCargo"></select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Data de admissão
+        </label>
+
+        <input
+          type="date"
+          id="editAdmissao">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Último período aquisitivo
+        </label>
+
+        <div class="aquisitivo-info">
+
+          <div
+            id="editUltimoPeriodoAquisitivo"
+            class="aquisitivo-valor">
+            Informe a data de admissão.
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Mês do último benefício de férias
+        </label>
+
+        <select id="editMesUltimoBeneficio">
+          <option value="">Selecione o mês</option>
+        </select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          Data de nascimento
+        </label>
+
+        <input
+          type="date"
+          id="editNascimento">
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          1º mês
+        </label>
+
+        <select id="editMes1"></select>
+
+      </div>
+
+
+      <div class="form-group">
+
+        <label>
+          2º mês
+        </label>
+
+        <select id="editMes2"></select>
+
+      </div>
+
+    </div>
+
+
+    <div class="form-group">
+
+      <label style="display:flex;gap:10px;align-items:center">
+
+        <input
+          type="checkbox"
+          id="editAbono"
+          style="width:auto">
+
+        Solicita abono de 10 dias
+
+      </label>
+
+    </div>
+
+
+    <div style="display:flex;justify-content:flex-end">
+
+      <button
+        class="btn btn-light"
+        onclick="fecharModal()">
+
+        Cancelar
+
+      </button>
+
+      <button
+        class="btn btn-primary"
+        onclick="salvarEdicao()">
+
+        Salvar alterações
+
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ===================================================
+     JAVASCRIPT
+=================================================== -->
+
+<script>
+
+let dadosSistema = null;
+
+let adminToken = null;
+
+let funcionariosAdmin = [];
+
+let solicitacoesAdmin = [];
+
+
+/* =====================================================
+   INICIALIZAÇÃO
+===================================================== */
+
+document.addEventListener('DOMContentLoaded', function(){
+
+  carregarSistema();
+
+  document
+    .getElementById('formCadastro')
+    .addEventListener('submit', enviarCadastro);
+
+  document
+    .getElementById('cadAdmissao')
+    .addEventListener('change', atualizarUltimoPeriodoAquisitivoCadastro);
+
+  document
+    .getElementById('editAdmissao')
+    .addEventListener('change', atualizarUltimoPeriodoAquisitivoAdmin);
+
+  window.addEventListener('popstate', function(){
+
+    const pagina =
+      location.hash.replace('#','') || 'inicio';
+
+    mostrarPagina(pagina, false);
+
+  });
+
+  const inicial =
+    location.hash.replace('#','') || 'inicio';
+
+  mostrarPagina(inicial, false);
+
+});
+
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+function mostrarLoading(){
+
+  document
+    .getElementById('loading')
+    .style.display = 'flex';
+
+}
+
+
+function esconderLoading(){
+
+  document
+    .getElementById('loading')
+    .style.display = 'none';
+
+}
+
+
+/* =====================================================
+   TOAST
+===================================================== */
+
+function toast(mensagem, tipo='sucesso'){
+
+  const el =
+    document.getElementById('toast');
+
+  el.textContent = mensagem;
+
+  el.className = tipo;
+
+  el.style.display = 'block';
+
+  setTimeout(function(){
+
+    el.style.display = 'none';
+
+  }, 4500);
+
+}
+
+
+/* =====================================================
+   CHAMADA APPS SCRIPT
+===================================================== */
+
+function servidor(nomeFuncao, ...args){
+
+  return new Promise(function(resolve, reject){
+
+    mostrarLoading();
+
+    let finalizado = false;
+
+    const encerrar = function(){
+      if(finalizado) return false;
+      finalizado = true;
+      clearTimeout(temporizador);
+      esconderLoading();
+      return true;
+    };
+
+    const temporizador = setTimeout(function(){
+      if(!encerrar()) return;
+      const mensagem = 'A conexão com o sistema demorou mais que o esperado. Abra o endereço publicado do Aplicativo da Web do Google Apps Script (URL terminada em /exec), atualize a página e tente novamente.';
+      toast(mensagem, 'erro');
+      reject(new Error(mensagem));
+    }, 20000);
+
+    // O sistema precisa ser aberto pelo endereço publicado do Apps Script.
+    // Se o HTML for aberto como arquivo local, google.script.run não existe.
+    if(
+      typeof window.google === 'undefined' ||
+      !window.google.script ||
+      !window.google.script.run ||
+      typeof window.google.script.run[nomeFuncao] !== 'function'
+    ){
+      encerrar();
+      const mensagem = 'O sistema precisa ser aberto pelo link publicado do Google Apps Script, terminado em /exec. Não abra o arquivo HTML diretamente pelo computador.';
+      toast(mensagem, 'erro');
+      reject(new Error(mensagem));
+      return;
+    }
+
+    try{
+      google.script.run
+        .withSuccessHandler(function(resultado){
+          if(!encerrar()) return;
+          resolve(resultado);
+        })
+        .withFailureHandler(function(erro){
+          if(!encerrar()) return;
+          const mensagem =
+            erro && erro.message
+              ? erro.message
+              : 'Não foi possível comunicar com o servidor. Confira a implantação do Apps Script.';
+          toast(mensagem, 'erro');
+          reject(new Error(mensagem));
+        })[nomeFuncao](...args);
+    }catch(erro){
+      if(encerrar()){
+        const mensagem = 'Falha ao chamar o servidor do Google Apps Script. Confirme que abriu o link publicado do sistema.';
+        toast(mensagem, 'erro');
+        reject(new Error(mensagem));
+      }
+    }
+
+  });
+
+}
+
+
+/* =====================================================
+   SISTEMA
+===================================================== */
+
+async function carregarSistema(){
+
+  try{
+
+    dadosSistema =
+      await servidor('obterDadosIniciais');
+
+    preencherCargos();
+
+    preencherMeses();
+
+    carregarDashboard();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   NAVEGAÇÃO
+===================================================== */
+
+function navegar(pagina){
+
+  if(location.hash !== '#' + pagina){
+
+    history.pushState(
+      {pagina:pagina},
+      '',
+      '#' + pagina
+    );
+
+  }
+
+  mostrarPagina(pagina, true);
+
+}
+
+
+function mostrarPagina(pagina, carregar=true){
+
+  const paginas =
+    document.querySelectorAll('.page');
+
+  paginas.forEach(function(el){
+
+    el.classList.remove('ativa');
+
+  });
+
+  const alvo =
+    document.getElementById(
+      'page-' + pagina
+    );
+
+  if(!alvo){
+
+    pagina = 'inicio';
+
+  }
+
+  const final =
+    document.getElementById(
+      'page-' + pagina
+    );
+
+  if(final){
+
+    final.classList.add('ativa');
+
+  }
+
+  document
+    .querySelectorAll('[data-nav]')
+    .forEach(function(btn){
+
+      btn.classList.toggle(
+        'ativo',
+        btn.dataset.nav === pagina
+      );
+
+    });
+
+
+  if(carregar){
+
+    if(pagina === 'ranking'){
+      carregarRanking();
+    }
+
+    if(pagina === 'inicio'){
+      carregarDashboard();
+    }
+
+    if(pagina === 'admin' && adminToken){
+      carregarPainelAdmin();
+    }
+
+  }
+
+  window.scrollTo({
+    top:0,
+    behavior:'smooth'
+  });
+
+}
+
+
+/* =====================================================
+   CARGOS
+===================================================== */
+
+function preencherCargos(){
+
+  if(!dadosSistema) return;
+
+  const selects = [
+    document.getElementById('cadCargo'),
+    document.getElementById('editCargo')
+  ];
+
+  selects.forEach(function(select){
+
+    if(!select) return;
+
+    select.innerHTML = '';
+
+    dadosSistema.cargos.forEach(function(cargo){
+
+      const option =
+        document.createElement('option');
+
+      option.value = cargo;
+      option.textContent = cargo;
+
+      select.appendChild(option);
+
+    });
+
+  });
+
+
+  const filtro =
+    document.getElementById('filtroCargo');
+
+  if(filtro){
+
+    filtro.innerHTML =
+      '<option value="TODOS">Todos os cargos</option>';
+
+    dadosSistema.cargos.forEach(function(cargo){
+
+      const option =
+        document.createElement('option');
+
+      option.value = cargo;
+      option.textContent = cargo;
+
+      filtro.appendChild(option);
+
+    });
+
+  }
+
+}
+
+
+/* =====================================================
+   MESES
+===================================================== */
+
+function preencherMeses(){
+
+  if(!dadosSistema) return;
+
+  const selects = [
+    document.getElementById('cadMes1'),
+    document.getElementById('cadMes2'),
+    document.getElementById('editMes1'),
+    document.getElementById('editMes2')
+  ];
+
+  const selectsUltimoBeneficio = [
+    document.getElementById('cadMesUltimoBeneficio'),
+    document.getElementById('editMesUltimoBeneficio')
+  ];
+
+  selects.forEach(function(select){
+
+    if(!select) return;
+
+    const atual =
+      select.value;
+
+    select.innerHTML =
+      '<option value="">Selecione</option>';
+
+    dadosSistema.meses.forEach(function(mes){
+
+      const option =
+        document.createElement('option');
+
+      option.value = mes;
+      option.textContent = mes;
+
+      select.appendChild(option);
+
+    });
+
+    if(atual){
+      select.value = atual;
+    }
+
+  });
+
+  selectsUltimoBeneficio.forEach(function(select){
+    if(!select) return;
+
+    const atual = select.value;
+    select.innerHTML = '<option value="">Selecione o mês</option>';
+
+    const opcaoNenhum = document.createElement('option');
+    opcaoNenhum.value = 'Ainda não tirei férias';
+    opcaoNenhum.textContent = 'Ainda não tirei férias';
+    select.appendChild(opcaoNenhum);
+
+    dadosSistema.meses.forEach(function(mes){
+      const option = document.createElement('option');
+      option.value = mes;
+      option.textContent = mes;
+      select.appendChild(option);
+    });
+
+    if(atual){
+      select.value = atual;
+    }
+  });
+
+}
+
+
+/* =====================================================
+   CADASTRO
+===================================================== */
+
+async function enviarCadastro(event){
+
+  event.preventDefault();
+
+  const nome =
+    document.getElementById('cadNome').value.trim();
+
+  const cpf =
+    document.getElementById('cadCPF').value;
+
+  const matricula =
+    document.getElementById('cadMatricula').value.trim();
+
+  const cargo =
+    document.getElementById('cadCargo').value;
+
+  const dataAdmissao =
+    document.getElementById('cadAdmissao').value;
+
+  const dataNascimento =
+    document.getElementById('cadNascimento').value;
+
+  const mes1 =
+    document.getElementById('cadMes1').value;
+
+  const mes2 =
+    document.getElementById('cadMes2').value;
+
+  const mesUltimoBeneficio =
+    document.getElementById('cadMesUltimoBeneficio').value;
+
+  const vende10Dias =
+    document.getElementById('cadAbono').checked;
+
+
+  if(mes1 === mes2){
+
+    toast(
+      'Escolha dois meses diferentes.',
+      'erro'
+    );
+
+    return;
+
+  }
+
+
+  const dados = {
+
+    nome,
+    cpf,
+    matricula,
+    cargo,
+    dataAdmissao,
+    dataNascimento,
+    mes1,
+    mes2,
+    mesUltimoBeneficio,
+    vende10Dias
+
+  };
+
+
+  try{
+
+    const resultado =
+      await servidor(
+        'cadastrarFuncionario',
+        dados
+      );
+
+    toast(
+      resultado.mensagem,
+      'sucesso'
+    );
+
+    document
+      .getElementById('formCadastro')
+      .reset();
+
+    setTimeout(function(){
+
+      navegar('consulta');
+
+    }, 1000);
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   ÚLTIMO PERÍODO AQUISITIVO
+===================================================== */
+
+function calcularUltimoPeriodoAquisitivo(dataString){
+
+  if(!dataString){
+    return null;
+  }
+
+  let admissao;
+
+  // Aceita tanto o formato do campo date (AAAA-MM-DD)
+  // quanto a data brasileira devolvida pela consulta (DD/MM/AAAA).
+  if(/^\d{2}\/\d{2}\/\d{4}$/.test(String(dataString))){
+    const partes = String(dataString).split('/');
+    admissao = new Date(
+      Number(partes[2]),
+      Number(partes[1]) - 1,
+      Number(partes[0])
+    );
+  }else{
+    admissao = new Date(dataString + 'T00:00:00');
+  }
+
+  if(isNaN(admissao.getTime())){
+    return null;
+  }
+
+  const hoje = new Date();
+
+  const proximoAniversario = new Date(
+    hoje.getFullYear(),
+    admissao.getMonth(),
+    admissao.getDate()
+  );
+
+  let fimPeriodo = proximoAniversario;
+
+  if(hoje < proximoAniversario){
+    fimPeriodo = new Date(
+      hoje.getFullYear() - 1,
+      admissao.getMonth(),
+      admissao.getDate()
+    );
+  }
+
+  const primeiroAniversario = new Date(
+    admissao.getFullYear() + 1,
+    admissao.getMonth(),
+    admissao.getDate()
+  );
+
+  if(hoje < primeiroAniversario){
+    return null;
+  }
+
+  const inicioPeriodo = new Date(
+    fimPeriodo.getFullYear() - 1,
+    fimPeriodo.getMonth(),
+    fimPeriodo.getDate()
+  );
+
+  const fimPeriodoReal = new Date(fimPeriodo);
+  fimPeriodoReal.setDate(fimPeriodoReal.getDate() - 1);
+
+  return {
+    inicio: inicioPeriodo,
+    fim: fimPeriodoReal
+  };
+}
+
+
+function formatarDataAquisitivo(data){
+
+  return data.toLocaleDateString('pt-BR',{
+    day:'2-digit',
+    month:'2-digit',
+    year:'numeric'
+  });
+}
+
+
+function calcularUltimoPeriodoAquisitivoTexto(dataString){
+
+  const periodo =
+    calcularUltimoPeriodoAquisitivo(dataString);
+
+  if(!periodo){
+    return 'Ainda não há período aquisitivo completo.';
+  }
+
+  return formatarDataAquisitivo(periodo.inicio) +
+    ' a ' +
+    formatarDataAquisitivo(periodo.fim);
+}
+
+
+function atualizarUltimoPeriodoAquisitivoCadastro(){
+
+  const valor =
+    document.getElementById('cadAdmissao').value;
+
+  document.getElementById('cadUltimoPeriodoAquisitivo').textContent =
+    calcularUltimoPeriodoAquisitivoTexto(valor);
+
+}
+
+
+function atualizarUltimoPeriodoAquisitivoAdmin(){
+
+  const elemento =
+    document.getElementById('editUltimoPeriodoAquisitivo');
+
+  if(!elemento) return;
+
+  const valor =
+    document.getElementById('editAdmissao').value;
+
+  elemento.textContent =
+    calcularUltimoPeriodoAquisitivoTexto(valor);
+
+}
+
+
+/* =====================================================
+   CPF
+===================================================== */
+
+function formatarCPF(input){
+
+  let valor =
+    input.value
+      .replace(/\D/g,'')
+      .substring(0,11);
+
+  if(valor.length > 9){
+
+    valor =
+      valor.replace(
+        /^(\d{3})(\d{3})(\d{3})(\d{2}).*/,
+        '$1.$2.$3-$4'
+      );
+
+  }else if(valor.length > 6){
+
+    valor =
+      valor.replace(
+        /^(\d{3})(\d{3})(\d{1,3}).*/,
+        '$1.$2.$3'
+      );
+
+  }else if(valor.length > 3){
+
+    valor =
+      valor.replace(
+        /^(\d{3})(\d{1,3}).*/,
+        '$1.$2'
+      );
+
+  }
+
+  input.value = valor;
+
+}
+
+
+/* =====================================================
+   DASHBOARD
+===================================================== */
+
+async function carregarDashboard(){
+
+  try{
+
+    const d =
+      await servidor('obterDashboard');
+
+    const html = `
+
+      <div class="metric">
+
+        <div class="metric-label">
+          TOTAL
+        </div>
+
+        <div class="metric-number">
+          ${d.total}
+        </div>
+
+      </div>
+
+
+      <div class="metric">
+
+        <div class="metric-label">
+          🟨 ATENÇÃO
+        </div>
+
+        <div class="metric-number">
+          ${d.atencao}
+        </div>
+
+      </div>
+
+
+      <div class="metric">
+
+        <div class="metric-label">
+          🟧 ALERTA
+        </div>
+
+        <div class="metric-number">
+          ${d.alerta}
+        </div>
+
+      </div>
+
+
+      <div class="metric">
+
+        <div class="metric-label">
+          🟥 URGENTE
+        </div>
+
+        <div class="metric-number">
+          ${d.urgente}
+        </div>
+
+      </div>
+
+    `;
+
+    document
+      .getElementById('dashboardCards')
+      .innerHTML = html;
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   RANKING
+===================================================== */
+
+async function carregarRanking(){
+
+  const filtro =
+    document.getElementById('filtroCargo').value;
+
+  try{
+
+    const lista =
+      await servidor(
+        'obterRanking',
+        filtro
+      );
+
+    const container =
+      document.getElementById('rankingLista');
+
+    if(!lista.length){
+
+      container.innerHTML = `
+
+        <div class="card">
+
+          <h3>
+            Nenhum funcionário cadastrado.
+          </h3>
+
+          <p class="help">
+            Assim que os funcionários realizarem o cadastro,
+            aparecerão nesta lista.
+          </p>
+
+        </div>
+
+      `;
+
+      return;
+
+    }
+
+
+    container.innerHTML =
+      lista.map(function(f){
+
+        const status =
+          classeStatus(f.statusPrazo);
+
+        return `
+
+          <div class="rank-card">
+
+            <div class="rank-number">
+              ${f.posicao}º
+            </div>
+
+            <div class="rank-main">
+
+              <div class="rank-name">
+                ${escapeHtml(f.nome)}
+              </div>
+
+              <div class="rank-info">
+
+                ${escapeHtml(f.cargo)}
+                · ${f.idade} anos
+                · ${f.mesesServico} meses de serviço
+
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <div class="month-badge">
+                1º ${escapeHtml(f.mes1)}
+              </div>
+
+              <div class="month-badge"
+                   style="margin-top:5px">
+
+                2º ${escapeHtml(f.mes2)}
+
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <span class="status ${status.classe}">
+
+                ${status.icone}
+                ${status.nome}
+
+              </span>
+
+            </div>
+
+
+            <div>
+
+              ${
+                f.vende10Dias
+                  ? '<span class="month-badge">10 dias</span>'
+                  : ''
+              }
+
+            </div>
+
+          </div>
+
+        `;
+
+      }).join('');
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   STATUS
+===================================================== */
+
+function classeStatus(status){
+
+  if(!status){
+    return {
+      classe:'status-normal',
+      icone:'⚪',
+      nome:'NORMAL'
+    };
+  }
+
+  if(status.codigo === 'ATENCAO'){
+
+    return {
+      classe:'status-atencao',
+      icone:'🟨',
+      nome:'ATENÇÃO'
+    };
+
+  }
+
+  if(status.codigo === 'ALERTA'){
+
+    return {
+      classe:'status-alerta',
+      icone:'🟧',
+      nome:'ALERTA'
+    };
+
+  }
+
+  if(status.codigo === 'URGENTE'){
+
+    return {
+      classe:'status-urgente',
+      icone:'🟥',
+      nome:'URGENTE'
+    };
+
+  }
+
+  if(status.codigo === 'VENCIDA'){
+
+    return {
+      classe:'status-vencida',
+      icone:'⛔',
+      nome:'VERIFICAR'
+    };
+
+  }
+
+  return {
+    classe:'status-normal',
+    icone:'⚪',
+    nome:'NORMAL'
+  };
+
+}
+
+
+/* =====================================================
+   CONSULTA
+===================================================== */
+
+async function consultarFuncionario(){
+
+  const cpf =
+    document.getElementById('consultaCPF').value;
+
+  const matricula =
+    document.getElementById('consultaMatricula').value.trim();
+
+
+  try{
+
+    const f =
+      await servidor(
+        'consultarFuncionario',
+        cpf,
+        matricula
+      );
+
+    const status =
+      classeStatus(f.statusPrazo);
+
+
+    document
+      .getElementById('resultadoConsulta')
+      .innerHTML = `
+
+        <div class="card">
+
+          <h2>
+            ${escapeHtml(f.nome)}
+          </h2>
+
+          <p class="help">
+            Cadastro localizado com sucesso.
+          </p>
+
+
+          <div class="grid grid-3">
+
+            <div>
+
+              <strong>Matrícula</strong>
+
+              <div>
+                ${escapeHtml(f.matricula)}
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <strong>CPF</strong>
+
+              <div>
+                ${escapeHtml(f.cpf)}
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <strong>Cargo</strong>
+
+              <div>
+                ${escapeHtml(f.cargo)}
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <strong>Admissão</strong>
+
+              <div>
+                ${f.dataAdmissao}
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <strong>Nascimento</strong>
+
+              <div>
+                ${f.dataNascimento}
+              </div>
+
+            </div>
+
+
+            <div>
+
+              <strong>Tempo de serviço</strong>
+
+              <div>
+                ${f.mesesServico} meses
+              </div>
+
+            </div>
+
+            <div>
+
+              <strong>Último período aquisitivo</strong>
+
+              <div>
+                ${calcularUltimoPeriodoAquisitivoTexto(f.dataAdmissao)}
+              </div>
+
+            </div>
+
+            <div>
+
+              <strong>Mês do último benefício de férias</strong>
+
+              <div>
+                ${escapeHtml(f.mesUltimoBeneficio || 'Não informado')}
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <hr style="border:0;border-top:1px solid #e2e8f0;margin:25px 0">
+
+
+          <h3>
+            Preferências
+          </h3>
+
+
+          <div class="grid grid-3">
+
+            <div class="metric">
+
+              <div class="metric-label">
+                1º MÊS
+              </div>
+
+              <div class="metric-number"
+                   style="font-size:22px">
+
+                ${escapeHtml(f.mes1)}
+
+              </div>
+
+            </div>
+
+
+            <div class="metric">
+
+              <div class="metric-label">
+                2º MÊS
+              </div>
+
+              <div class="metric-number"
+                   style="font-size:22px">
+
+                ${escapeHtml(f.mes2)}
+
+              </div>
+
+            </div>
+
+
+            <div class="metric">
+
+              <div class="metric-label">
+                ABONO
+              </div>
+
+              <div class="metric-number"
+                   style="font-size:22px">
+
+                ${f.vende10Dias ? '10 dias' : 'Não'}
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div style="margin-top:20px">
+
+            <span class="status ${status.classe}">
+
+              ${status.icone}
+              ${status.nome}
+
+            </span>
+
+          </div>
+
+
+          <div style="margin-top:25px">
+
+            <button
+              class="btn btn-primary"
+              onclick="abrirSolicitacao('${f.id}')">
+
+              Solicitar alteração
+
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   SOLICITAÇÃO
+===================================================== */
+
+function abrirSolicitacao(id){
+
+  const descricao =
+    prompt(
+      'Descreva o que você deseja alterar:\n\nExemplo: Quero alterar meu primeiro mês de Janeiro para Março.'
+    );
+
+  if(!descricao || !descricao.trim()){
+    return;
+  }
+
+  enviarSolicitacao(
+    id,
+    descricao.trim()
+  );
+
+}
+
+
+async function enviarSolicitacao(id, descricao){
+
+  try{
+
+    const resultado =
+      await servidor(
+        'solicitarAlteracao',
+        {
+          id:id,
+          tipo:'ALTERAÇÃO DE DADOS',
+          descricao:descricao
+        }
+      );
+
+    toast(
+      'Solicitação enviada. Protocolo: ' +
+      resultado.protocolo,
+      'sucesso'
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   ADMIN LOGIN
+===================================================== */
+
+async function loginAdmin(){
+
+  const senha =
+    document
+      .getElementById('senhaAdmin')
+      .value;
+
+  if(!senha){
+
+    toast(
+      'Digite a senha administrativa.',
+      'erro'
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const resultado =
+      await servidor(
+        'loginAdministrador',
+        senha
+      );
+
+    adminToken =
+      resultado.token;
+
+    document
+      .getElementById('adminLogin')
+      .style.display = 'none';
+
+    document
+      .getElementById('adminPainel')
+      .style.display = 'block';
+
+    toast(
+      resultado.mensagem,
+      'sucesso'
+    );
+
+    carregarPainelAdmin();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   PAINEL ADMIN
+===================================================== */
+
+async function carregarPainelAdmin(){
+
+  if(!adminToken){
+
+    return;
+
+  }
+
+  try{
+
+    const dados =
+      await servidor(
+        'obterPainelAdmin',
+        adminToken
+      );
+
+    funcionariosAdmin =
+      dados.funcionarios;
+
+    solicitacoesAdmin =
+      dados.solicitacoes;
+
+    renderizarTabelaFuncionarios();
+
+    renderizarTabelaSolicitacoes();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   TABELA FUNCIONÁRIOS
+===================================================== */
+
+function renderizarTabelaFuncionarios(){
+
+  const tbody =
+    document.getElementById(
+      'tabelaFuncionarios'
+    );
+
+  tbody.innerHTML =
+    funcionariosAdmin.map(function(f){
+
+      const status =
+        classeStatus(f.statusPrazo);
+
+      return `
+
+        <tr>
+
+          <td>
+            <strong>
+              ${escapeHtml(f.nome)}
+            </strong>
+          </td>
+
+          <td>
+            ${escapeHtml(f.cpf)}
+          </td>
+
+          <td>
+            ${escapeHtml(f.matricula)}
+          </td>
+
+          <td>
+            ${escapeHtml(f.cargo)}
+          </td>
+
+          <td>
+            ${escapeHtml(f.mes1)}
+          </td>
+
+          <td>
+            ${escapeHtml(f.mes2)}
+          </td>
+
+          <td>
+            ${escapeHtml(f.mesUltimoBeneficio || 'Não informado')}
+          </td>
+
+          <td>
+            ${f.vende10Dias ? 'SIM' : 'NÃO'}
+          </td>
+
+          <td>
+
+            <span class="status ${status.classe}">
+              ${status.icone}
+              ${status.nome}
+            </span>
+
+          </td>
+
+          <td>
+
+            <button
+              class="btn btn-primary"
+              style="padding:8px 12px"
+              onclick="abrirEdicao('${f.id}')">
+
+              Editar
+
+            </button>
+
+            <button
+              class="btn btn-danger"
+              style="padding:8px 12px"
+              onclick="excluirFuncionario('${f.id}')">
+
+              Excluir
+
+            </button>
+
+          </td>
+
+        </tr>
+
+      `;
+
+    }).join('');
+
+}
+
+
+/* =====================================================
+   EDITAR
+===================================================== */
+
+function abrirEdicao(id){
+
+  const f =
+    funcionariosAdmin.find(
+      x => String(x.id) === String(id)
+    );
+
+  if(!f){
+
+    toast(
+      'Funcionário não encontrado.',
+      'erro'
+    );
+
+    return;
+
+  }
+
+
+  preencherMeses();
+
+  preencherCargos();
+
+
+  document
+    .getElementById('editId')
+    .value = f.id;
+
+  document
+    .getElementById('editNome')
+    .value = f.nome;
+
+  document
+    .getElementById('editCPF')
+    .value = f.cpf;
+
+  document
+    .getElementById('editMatricula')
+    .value = f.matricula;
+
+  document
+    .getElementById('editCargo')
+    .value = f.cargo;
+
+  document
+    .getElementById('editAdmissao')
+    .value = f.dataAdmissao;
+
+  atualizarUltimoPeriodoAquisitivoAdmin();
+
+  document
+    .getElementById('editNascimento')
+    .value = f.dataNascimento;
+
+  document
+    .getElementById('editMes1')
+    .value = f.mes1;
+
+  document
+    .getElementById('editMes2')
+    .value = f.mes2;
+
+  document
+    .getElementById('editMesUltimoBeneficio')
+    .value = f.mesUltimoBeneficio || '';
+
+  document
+    .getElementById('editAbono')
+    .checked = f.vende10Dias;
+
+
+  document
+    .getElementById('modalEdicao')
+    .classList.add('aberto');
+
+}
+
+
+function fecharModal(){
+
+  document
+    .getElementById('modalEdicao')
+    .classList.remove('aberto');
+
+}
+
+
+async function salvarEdicao(){
+
+  const dados = {
+
+    id:
+      document.getElementById('editId').value,
+
+    nome:
+      document.getElementById('editNome').value,
+
+    cpf:
+      document.getElementById('editCPF').value,
+
+    matricula:
+      document.getElementById('editMatricula').value,
+
+    cargo:
+      document.getElementById('editCargo').value,
+
+    dataAdmissao:
+      document.getElementById('editAdmissao').value,
+
+    dataNascimento:
+      document.getElementById('editNascimento').value,
+
+    mes1:
+      document.getElementById('editMes1').value,
+
+    mes2:
+      document.getElementById('editMes2').value,
+
+    mesUltimoBeneficio:
+      document.getElementById('editMesUltimoBeneficio').value,
+
+    vende10Dias:
+      document.getElementById('editAbono').checked
+
+  };
+
+
+  if(dados.mes1 === dados.mes2){
+
+    toast(
+      'Os dois meses precisam ser diferentes.',
+      'erro'
+    );
+
+    return;
+
+  }
+
+
+  try{
+
+    const resultado =
+      await servidor(
+        'editarFuncionario',
+        adminToken,
+        dados
+      );
+
+    toast(
+      resultado.mensagem,
+      'sucesso'
+    );
+
+    fecharModal();
+
+    carregarPainelAdmin();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   EXCLUIR
+===================================================== */
+
+async function excluirFuncionario(id){
+
+  const confirmar =
+    confirm(
+      'Tem certeza que deseja excluir este funcionário?\n\nEsta ação não poderá ser desfeita.'
+    );
+
+  if(!confirmar){
+    return;
+  }
+
+
+  try{
+
+    const resultado =
+      await servidor(
+        'excluirFuncionario',
+        adminToken,
+        id
+      );
+
+    toast(
+      resultado.mensagem,
+      'sucesso'
+    );
+
+    carregarPainelAdmin();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   SOLICITAÇÕES ADMIN
+===================================================== */
+
+function renderizarTabelaSolicitacoes(){
+
+  const tbody =
+    document.getElementById(
+      'tabelaSolicitacoes'
+    );
+
+  if(!solicitacoesAdmin.length){
+
+    tbody.innerHTML = `
+
+      <tr>
+
+        <td colspan="6">
+
+          Nenhuma solicitação registrada.
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    solicitacoesAdmin.map(function(s){
+
+      return `
+
+        <tr>
+
+          <td>
+            ${escapeHtml(s.data)}
+          </td>
+
+          <td>
+
+            <strong>
+              ${escapeHtml(s.nome)}
+            </strong>
+
+            <br>
+
+            <small>
+              ${escapeHtml(s.matricula)}
+            </small>
+
+          </td>
+
+          <td>
+            ${escapeHtml(s.tipo)}
+          </td>
+
+          <td>
+            ${escapeHtml(s.descricao)}
+          </td>
+
+          <td>
+            ${escapeHtml(s.status)}
+          </td>
+
+          <td>
+
+            ${
+              s.status === 'PENDENTE'
+              ?
+              `
+                <button
+                  class="btn btn-green"
+                  style="padding:8px 12px"
+                  onclick="analisarSolicitacao('${s.id}','APROVADA')">
+
+                  Aprovar
+
+                </button>
+
+                <button
+                  class="btn btn-danger"
+                  style="padding:8px 12px"
+                  onclick="analisarSolicitacao('${s.id}','RECUSADA')">
+
+                  Recusar
+
+                </button>
+              `
+              :
+              `
+                <small>
+                  Analisada
+                </small>
+              `
+            }
+
+          </td>
+
+        </tr>
+
+      `;
+
+    }).join('');
+
+}
+
+
+async function analisarSolicitacao(id,status){
+
+  let observacao =
+    prompt(
+      'Digite uma observação para registrar no histórico (opcional):'
+    );
+
+  if(observacao === null){
+    observacao = '';
+  }
+
+
+  try{
+
+    const resultado =
+      await servidor(
+        'analisarSolicitacao',
+        adminToken,
+        id,
+        status,
+        observacao
+      );
+
+    toast(
+      resultado.mensagem,
+      'sucesso'
+    );
+
+    carregarPainelAdmin();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+
+/* =====================================================
+   ESCAPE
+===================================================== */
+
+function escapeHtml(valor){
+
+  return String(valor || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#039;');
+
+}
+
+</script>
+
+<!-- ===================================================
+     RODAPÉ LEGAL — CLT, ART. 130
+=================================================== -->
+
+<footer class="rodape-legal">
+
+  <details>
+
+    <summary>
+      Referência legal — CLT, Art. 130 (férias)
+    </summary>
+
+    <div class="lei-conteudo">
+
+      <strong>Art. 130</strong> - Após cada período de 12 (doze) meses de vigência do contrato de trabalho, o empregado terá direito a férias, na seguinte proporção:
+
+      <br><br>
+
+      I - 30 (trinta) dias corridos, quando não houver faltado ao serviço mais de 5 (cinco) vezes;
+
+      <br>
+
+      II - 24 (vinte e quatro) dias corridos, quando houver tido de 6 (seis) a 14 (quatorze) faltas;
+
+      <br>
+
+      III - 18 (dezoito) dias corridos, quando houver tido de 15 (quinze) a 23 (vinte e três) faltas;
+
+      <br>
+
+      IV - 12 (doze) dias corridos, quando houver tido de 24 (vinte e quatro) a 32 (trinta e duas) faltas.
+
+      <br><br>
+
+      <strong>§ 1º</strong> - É vedado descontar, do período de férias, as faltas do empregado ao serviço.
+
+      <br><br>
+
+      <strong>§ 2º</strong> - O período das férias será computado, para todos os efeitos, como tempo de serviço.
+
+    </div>
+
+  </details>
+
+</footer>
+
+</body>
+
+</html>
